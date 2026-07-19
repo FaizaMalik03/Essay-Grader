@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Essay Grading Assistant</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;padding:20px}
+.wrap{max-width:860px;margin:0 auto}
+.hdr{background:linear-gradient(135deg,#534AB7,#1D9E75);color:#fff;padding:24px;border-radius:12px;margin-bottom:20px;text-align:center}
+.hdr h1{font-size:26px;margin-bottom:4px}
+.hdr p{font-size:13px;opacity:.85}
+.card{background:#fff;border-radius:12px;padding:24px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.card h2{font-size:17px;color:#333;margin-bottom:14px}
+textarea{width:100%;height:200px;border:2px solid #e0e0e0;border-radius:8px;padding:12px;font-size:14px;font-family:inherit;resize:vertical;outline:none}
+textarea:focus{border-color:#534AB7}
+.btns{display:flex;gap:10px;margin-top:12px}
+.btn{padding:11px 24px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+.btnp{background:#534AB7;color:#fff;flex:1}
+.btnp:hover{background:#4239a0}
+.btns{background:#f0f0f0;color:#555}
+.loading{display:none;text-align:center;padding:24px;color:#666}
+.spin{width:38px;height:38px;border:4px solid #e0e0e0;border-top:4px solid #534AB7;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#result{display:none}
+.sbox{background:linear-gradient(135deg,#534AB7,#1D9E75);color:#fff;border-radius:10px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.snum{font-size:44px;font-weight:700}
+.slbl{font-size:12px;opacity:.8;margin-top:2px}
+.band{display:inline-block;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:4px}
+.fb{margin-bottom:14px;padding:14px;background:#f8f9fa;border-radius:8px;border-left:4px solid #534AB7}
+.fb h3{font-size:12px;font-weight:700;color:#534AB7;margin-bottom:6px;text-transform:uppercase}
+.fb p{font-size:14px;color:#444;line-height:1.6;white-space:pre-wrap}
+.fb.str{border-color:#1D9E75}.fb.str h3{color:#1D9E75}
+.fb.imp{border-color:#D85A30}.fb.imp h3{color:#D85A30}
+.fb.nxt{border-color:#BA7517}.fb.nxt h3{color:#BA7517}
+.err{background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:14px;color:#dc2626;display:none;margin-bottom:14px}
+.chips{display:flex;gap:10px;margin-top:10px}
+.chip{background:#f0f4f8;border-radius:6px;padding:5px 10px;font-size:12px;color:#666}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hdr">
+  <h1>AI Essay Grading Assistant</h1>
+  <p>IT9204 Project | Student 202507410 Faiza Malik | Bahrain Polytechnic</p>
+</div>
+<div class="card">
+  <h2>Submit Your Essay</h2>
+  <textarea id="essay" placeholder="Paste your essay here..."></textarea>
+  <div class="btns">
+    <button class="btn btnp" id="gradeBtn">Grade Essay</button>
+    <button class="btn" id="clearBtn">Clear</button>
+  </div>
+</div>
+<div class="err" id="errBox"></div>
+<div class="loading" id="loading">
+  <div class="spin"></div>
+  <p>Grading your essay — please wait...</p>
+</div>
+<div class="card" id="result">
+  <h2>Grading Result</h2>
+  <div class="sbox">
+    <div>
+      <div class="snum" id="sNum">-</div>
+      <div class="slbl">out of 10.0</div>
+      <div class="slbl" id="sRaw"></div>
+    </div>
+    <div style="text-align:right">
+      <div class="band" id="sBand">-</div>
+      <div class="slbl" id="sModel"></div>
+    </div>
+  </div>
+  <div class="fb"><h3>Summary</h3><p id="fSum">-</p></div>
+  <div class="fb str"><h3>Strengths</h3><p id="fStr">-</p></div>
+  <div class="fb imp"><h3>Improvements</h3><p id="fImp">-</p></div>
+  <div class="fb nxt"><h3>Next Steps</h3><p id="fNxt">-</p></div>
+  <div class="chips">
+    <div class="chip" id="cWords"></div>
+    <div class="chip" id="cModel"></div>
+  </div>
+</div>
+</div>
+<script>
+document.getElementById('gradeBtn').addEventListener('click', function() {
+  var essay = document.getElementById('essay').value.trim();
+  if (!essay) { showErr('Please paste an essay.'); return; }
+  if (essay.split(/\s+/).length < 10) { showErr('Essay too short.'); return; }
+  hideErr();
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('gradeBtn').disabled = true;
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/grade', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('gradeBtn').disabled = false;
+      if (xhr.status === 200) {
+        try {
+          var d = JSON.parse(xhr.responseText);
+          if (d.error) { showErr(d.error); return; }
+          showResult(d, essay);
+        } catch(e) { showErr('Invalid response.'); }
+      } else {
+        showErr('Server error: ' + xhr.status);
+      }
+    }
+  };
+  xhr.send(JSON.stringify({essay_text: essay}));
+});
+document.getElementById('clearBtn').addEventListener('click', function() {
+  document.getElementById('essay').value = '';
+  document.getElementById('result').style.display = 'none';
+  hideErr();
+});
+function showResult(d, essay) {
+  var score = d.predicted_score;
+  document.getElementById('sNum').textContent = score;
+  document.getElementById('sRaw').textContent = d.predicted_score_raw ? 'approx ' + d.predicted_score_raw + ' / 6' : '';
+  var band = getBand(score);
+  var colors = {Emerging:'#fee2e2',Beginning:'#fef3c7',Developing:'#dbeafe',Proficient:'#d1fae5',Exemplary:'#ede9fe'};
+  var tcolors = {Emerging:'#dc2626',Beginning:'#d97706',Developing:'#2563eb',Proficient:'#059669',Exemplary:'#7c3aed'};
+  var el = document.getElementById('sBand');
+  el.textContent = band;
+  el.style.background = colors[band] || '#eee';
+  el.style.color = tcolors[band] || '#333';
+  var txt = d.full_response || '';
+  document.getElementById('fSum').textContent = extract(txt,'Summary') || txt.split('\n')[0] || '-';
+  document.getElementById('fStr').textContent = extract(txt,'Strengths') || '-';
+  document.getElementById('fImp').textContent = extract(txt,'Improvements') || '-';
+  document.getElementById('fNxt').textContent = extract(txt,'Next steps') || extract(txt,'Next Steps') || '-';
+  document.getElementById('cWords').textContent = essay.split(/\s+/).length + ' words';
+  document.getElementById('cModel').textContent = 'Model: ' + (d.model_used || 'Linear Regression');
+  document.getElementById('sModel').textContent = d.model_used || '';
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+function getBand(s) {
+  if (s <= 2) return 'Emerging';
+  if (s <= 4) return 'Beginning';
+  if (s <= 6) return 'Developing';
+  if (s <= 8) return 'Proficient';
+  return 'Exemplary';
+}
+function extract(txt, heading) {
+  var r = new RegExp(heading + '[:\\s]+([^\n]+(?:\n(?![A-Z])[^\n]+)*)','i');
+  var m = txt.match(r);
+  return m ? m[1].trim() : null;
+}
+function showErr(msg) {
+  var b = document.getElementById('errBox');
+  b.textContent = msg;
+  b.style.display = 'block';
+}
+function hideErr() {
+  document.getElementById('errBox').style.display = 'none';
+}
+</script>
+</body>
+</html>
