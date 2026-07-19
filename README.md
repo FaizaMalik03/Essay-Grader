@@ -28,7 +28,7 @@ The aim of this project is to support educational assessment by reducing manual 
 ## Project Structure
 
 AI-Essay-Grader/
-
+│
 ├── app.py                     # Main Flask application
 ├── main.py                    # Main execution script
 ├── agent_v2.py                # AI agent implementation
@@ -36,21 +36,23 @@ AI-Essay-Grader/
 ├── 03_rag_setup.py            # RAG setup configuration
 ├── evaluation_analysis.py     # Model evaluation scripts
 ├── requirements.txt           # Required Python packages
-
+│
 ├── models/
 │   ├── model.pkl              # Trained scoring model
 │   ├── feature_names.json     # Model feature information
 │   └── score_meta.json        # Score metadata
-
+│
 ├── templates/
 │   └── index.html             # Web interface
-
+│
 ├── rubrics/
 │   ├── feedback_phrases.txt
 │   ├── writing_criteria.txt
 │   └── asap_scoring_rubric.docx
-
-├── data/                      # Train and test Dataset 
+│
+├── data/                      # Dataset and sample resources
+│
+└── deploy_files/              # Deployment files
 
 
 ## How to Run
