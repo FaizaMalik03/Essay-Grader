@@ -84,9 +84,9 @@ The system performance can be evaluated using standard machine learning metrics,
 
 ## Limitations
 
--The accuracy of the scores depends on the quality and variety of the training data.
--The feedback may not always be perfect and may need to be reviewed by a teacher.
--The system may not perform equally well for every writing style or essay type.
+- The accuracy of the scores depends on the quality and variety of the training data.
+- The feedback may not always be perfect and may need to be reviewed by a teacher.
+- The system may not perform equally well for every writing style or essay type.
 
 ## Future Improvements
 
