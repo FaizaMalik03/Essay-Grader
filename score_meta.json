@@ -1,0 +1,13 @@
+{
+  "raw_min": 1,
+  "raw_max": 6,
+  "norm_min": 0.0,
+  "norm_max": 10.0,
+  "norm_formula": "(raw_score - 1) / 5 * 10",
+  "model_name": "Linear Regression",
+  "rmse": 1.4643,
+  "r2": 0.5148,
+  "mae": 1.1004,
+  "training_subset": 5000,
+  "n_features": 10
+}
