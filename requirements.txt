@@ -1,0 +1,14 @@
+anthropic
+scikit-learn
+pandas
+numpy
+joblib
+textstat
+nltk
+scipy
+matplotlib
+chromadb
+sentence-transformers
+requests
+python-docx
+pypdf
