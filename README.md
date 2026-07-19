@@ -27,6 +27,7 @@ The aim of this project is to support educational assessment by reducing manual 
 
 ## Project Structure
 
+```text
 AI-Essay-Grader/
 │
 ├── app.py                     # Main Flask application
@@ -53,6 +54,7 @@ AI-Essay-Grader/
 ├── data/                      # Dataset and sample resources
 │
 └── deploy_files/              # Deployment files
+```
 
 
 ## How to Run
